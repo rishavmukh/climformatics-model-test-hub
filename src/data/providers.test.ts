@@ -27,6 +27,7 @@ describe('PROVIDERS registry', () => {
     const implemented = PROVIDERS.filter((provider) => provider.implemented);
     expect(implemented.map((provider) => provider.id)).toEqual([
       'open-meteo',
+      'tomorrow-io-solar',
       'visual-crossing-energy',
       'weatherbit',
       'accuweather-enterprise',

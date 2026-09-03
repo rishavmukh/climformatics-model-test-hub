@@ -119,7 +119,7 @@ export const PROVIDERS: WeatherProvider[] = [
     requiresCredentials: true,
     credentialFields: API_KEY_FIELD,
     docsUrl: 'https://docs.tomorrow.io/reference/solar',
-    implemented: false,
+    implemented: true,
     pricingNote: 'Solar layer requires contacting sales separately from core API pricing.',
   },
   {

@@ -11,6 +11,7 @@ import { fetchForecaSeries, ForecaRequestError } from '../api/forecaClient';
 import { fetchAtlasSeries, AtlasRequestError } from '../api/atlasClient';
 import { fetchAccuWeatherSeries, AccuWeatherRequestError } from '../api/accuweatherClient';
 import { fetchOpenWeatherSeries, OpenWeatherRequestError } from '../api/openWeatherClient';
+import { fetchTomorrowIoSeries, TomorrowIoRequestError } from '../api/tomorrowIoClient';
 import { PROVIDERS } from '../data/providers';
 import { getCredential, hasAllCredentials } from '../utils/credentials';
 import {
@@ -51,6 +52,12 @@ import {
   OPEN_WEATHER_DEFAULT_HOURLY_VARIABLES,
   OPEN_WEATHER_HOURLY_VARIABLES,
 } from '../data/openWeatherVariables';
+import {
+  TOMORROW_IO_CATEGORY_ORDER,
+  TOMORROW_IO_DAILY_VARIABLES,
+  TOMORROW_IO_DEFAULT_HOURLY_VARIABLES,
+  TOMORROW_IO_HOURLY_VARIABLES,
+} from '../data/tomorrowIoVariables';
 import type { GeocodingResult } from '../types';
 import type { SeriesBlock, SeriesResult, TimeRange, VariableDef } from '../api/seriesTypes';
 import type { PrecipitationUnit, TemperatureUnit, WindSpeedUnit } from '../api/openMeteoClient';
@@ -64,6 +71,7 @@ const FORECA_ID = 'foreca';
 const ATLAS_ID = 'athenium-atlas';
 const ACCUWEATHER_ID = 'accuweather-enterprise';
 const OPEN_WEATHER_ID = 'openweather-solar';
+const TOMORROW_IO_ID = 'tomorrow-io-solar';
 
 function isoToMonthDayYear(iso: string): string {
   const [year, month, day] = iso.split('-');
@@ -199,7 +207,8 @@ export function DashboardPage(): JSX.Element {
   const isAtlas = selectedProviderId === ATLAS_ID;
   const isAccuWeather = selectedProviderId === ACCUWEATHER_ID;
   const isOpenWeather = selectedProviderId === OPEN_WEATHER_ID;
-  const supportsFullTimeRange = isOpenMeteo || isVisualCrossing;
+  const isTomorrowIo = selectedProviderId === TOMORROW_IO_ID;
+  const supportsFullTimeRange = isOpenMeteo || isVisualCrossing || isTomorrowIo;
   const supportsDateRangeOnly = isAtlas;
   const supportsTimeRange = supportsFullTimeRange || supportsDateRangeOnly;
 
@@ -242,6 +251,11 @@ export function DashboardPage(): JSX.Element {
     hourlyCategoryOrder = OPEN_WEATHER_CATEGORY_ORDER;
     dailyCatalog = OPEN_WEATHER_DAILY_VARIABLES;
     dailyCategoryOrder = OPEN_WEATHER_CATEGORY_ORDER;
+  } else if (isTomorrowIo) {
+    hourlyCatalog = TOMORROW_IO_HOURLY_VARIABLES;
+    hourlyCategoryOrder = TOMORROW_IO_CATEGORY_ORDER;
+    dailyCatalog = TOMORROW_IO_DAILY_VARIABLES;
+    dailyCategoryOrder = TOMORROW_IO_CATEGORY_ORDER;
   }
 
   const missingCredentials = selectedProvider?.requiresCredentials === true && !hasAllCredentials(selectedProvider);
@@ -267,6 +281,8 @@ export function DashboardPage(): JSX.Element {
       setHourlyVariables(ACCUWEATHER_DEFAULT_HOURLY_VARIABLES);
     } else if (nextId === OPEN_WEATHER_ID) {
       setHourlyVariables(OPEN_WEATHER_DEFAULT_HOURLY_VARIABLES);
+    } else if (nextId === TOMORROW_IO_ID) {
+      setHourlyVariables(TOMORROW_IO_DEFAULT_HOURLY_VARIABLES);
     } else {
       setHourlyVariables(DEFAULT_HOURLY_VARIABLES);
     }
@@ -332,6 +348,8 @@ export function DashboardPage(): JSX.Element {
       request = fetchAccuWeatherSeries({ latitude, longitude, hourlyVariables, dailyVariables, metric: accuweatherMetric, apiKey });
     } else if (isOpenWeather) {
       request = fetchOpenWeatherSeries({ latitude, longitude, date: openWeatherDate, hourlyVariables, dailyVariables, apiKey });
+    } else if (isTomorrowIo) {
+      request = fetchTomorrowIoSeries({ latitude, longitude, hourlyVariables, dailyVariables, timeRange, apiKey });
     } else {
       request = fetchOpenMeteoSeries({
         latitude,
@@ -361,6 +379,7 @@ export function DashboardPage(): JSX.Element {
           err instanceof AtlasRequestError ||
           err instanceof AccuWeatherRequestError ||
           err instanceof OpenWeatherRequestError ||
+          err instanceof TomorrowIoRequestError ||
           err instanceof Error
             ? err.message
             : 'Request failed';
@@ -626,6 +645,11 @@ export function DashboardPage(): JSX.Element {
             {isOpenWeather && (
               <p className="text-xs text-ink-muted">
                 Fixed units — W/m² for instantaneous irradiance, Wh/m² for accumulated irradiation.
+              </p>
+            )}
+            {isTomorrowIo && (
+              <p className="text-xs text-ink-muted">
+                Fixed to Metric — an Imperial option exists in Tomorrow.io&apos;s API but wasn&apos;t verified live.
               </p>
             )}
             {isOpenMeteo && (

@@ -5,6 +5,7 @@ import { fetchForecaSeries, ForecaRequestError } from './forecaClient';
 import { fetchAtlasSeries, AtlasRequestError } from './atlasClient';
 import { fetchAccuWeatherSeries, AccuWeatherRequestError } from './accuweatherClient';
 import { fetchOpenWeatherSeries, OpenWeatherRequestError } from './openWeatherClient';
+import { fetchTomorrowIoSeries, TomorrowIoRequestError } from './tomorrowIoClient';
 
 export interface ConnectionTestResult {
   ok: boolean;
@@ -187,6 +188,30 @@ async function testOpenWeather(fieldValues: Record<string, string>): Promise<Con
   }
 }
 
+async function testTomorrowIo(fieldValues: Record<string, string>): Promise<ConnectionTestResult> {
+  const apiKey = fieldValues['apiKey'] ?? '';
+  if (!apiKey) return { ok: false, message: 'Enter an API key before testing.' };
+
+  try {
+    const result = await fetchTomorrowIoSeries({
+      latitude: TEST_LOCATION.latitude,
+      longitude: TEST_LOCATION.longitude,
+      hourlyVariables: ['temperature'],
+      dailyVariables: [],
+      timeRange: { mode: 'forecast', forecastDays: 1, pastDays: 0 },
+      apiKey,
+    });
+    const sample = result.hourly?.series['temperature']?.[0];
+    return {
+      ok: true,
+      message: typeof sample === 'number' ? `Key works — sample temperature ${sample}°C.` : 'Key works, but the test request returned no data.',
+    };
+  } catch (err) {
+    const message = err instanceof TomorrowIoRequestError || err instanceof Error ? err.message : 'Request failed';
+    return { ok: false, message };
+  }
+}
+
 /**
  * Live "does this key actually work" checks, one per provider that both
  * requires credentials and has a real client — the other cataloged
@@ -200,4 +225,5 @@ export const CONNECTION_TESTERS: Record<string, ConnectionTester> = {
   'athenium-atlas': testAtlas,
   'accuweather-enterprise': testAccuWeather,
   'openweather-solar': testOpenWeather,
+  'tomorrow-io-solar': testTomorrowIo,
 };
