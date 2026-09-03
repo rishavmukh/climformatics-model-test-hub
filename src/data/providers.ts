@@ -131,7 +131,7 @@ export const PROVIDERS: WeatherProvider[] = [
     requiresCredentials: true,
     credentialFields: API_KEY_FIELD,
     docsUrl: 'https://www.visualcrossing.com/resources/documentation/weather-api/energy-elements-in-the-timeline-weather-api/',
-    implemented: false,
+    implemented: true,
     pricingNote: 'Free to 1,000 records/day; pay-as-you-go from $0.0001/record; solar needs the Advanced Energy tier.',
   },
   {
@@ -155,7 +155,7 @@ export const PROVIDERS: WeatherProvider[] = [
     requiresCredentials: true,
     credentialFields: API_KEY_FIELD,
     docsUrl: 'https://www.weatherbit.io/pricing',
-    implemented: false,
+    implemented: true,
     pricingNote: 'Free tier: 50 req/day, non-commercial. Solar/energy data needs Business tier or higher (unpriced publicly).',
   },
   {
@@ -179,7 +179,7 @@ export const PROVIDERS: WeatherProvider[] = [
     requiresCredentials: true,
     credentialFields: API_KEY_FIELD,
     docsUrl: 'https://apidev.accuweather.com/developers/forecasts/parameters',
-    implemented: false,
+    implemented: true,
     pricingNote: 'Not public; contact sales@accuweather.com.',
   },
   {
@@ -191,7 +191,7 @@ export const PROVIDERS: WeatherProvider[] = [
     requiresCredentials: true,
     credentialFields: API_KEY_FIELD,
     docsUrl: 'https://docs.openweather.co.uk/api/solar-irradiance',
-    implemented: false,
+    implemented: true,
     pricingNote: '0.11 EUR per call, excl. VAT — one of the few providers here with a genuinely public unit price.',
   },
   {
@@ -227,7 +227,7 @@ export const PROVIDERS: WeatherProvider[] = [
     requiresCredentials: true,
     credentialFields: API_KEY_FIELD,
     docsUrl: 'https://corporate.foreca.com/en/weather-api-features',
-    implemented: false,
+    implemented: true,
     pricingNote: 'Custom quote based on use case and volume; no public price list.',
   },
   {
@@ -239,7 +239,7 @@ export const PROVIDERS: WeatherProvider[] = [
     requiresCredentials: true,
     credentialFields: API_KEY_FIELD,
     docsUrl: 'https://dev.atheniumanalytics.com/docs.html',
-    implemented: false,
+    implemented: true,
     pricingNote: 'Not public; contact sales.',
   },
   {
@@ -325,7 +325,7 @@ export const PROVIDERS: WeatherProvider[] = [
     requiresCredentials: true,
     credentialFields: API_KEY_FIELD,
     docsUrl: 'https://api.windy.com/point-forecast/docs',
-    implemented: false,
+    implemented: true,
     pricingNote: 'Requires two separate license keys (map + point forecast); pricing not published in the docs.',
   },
   {

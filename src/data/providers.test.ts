@@ -23,9 +23,18 @@ describe('PROVIDERS registry', () => {
     }
   });
 
-  it('includes exactly one implemented provider today: Open-Meteo', () => {
+  it('includes exactly the implemented providers with working clients today', () => {
     const implemented = PROVIDERS.filter((provider) => provider.implemented);
-    expect(implemented.map((provider) => provider.id)).toEqual(['open-meteo']);
+    expect(implemented.map((provider) => provider.id)).toEqual([
+      'open-meteo',
+      'visual-crossing-energy',
+      'weatherbit',
+      'accuweather-enterprise',
+      'openweather-solar',
+      'foreca',
+      'athenium-atlas',
+      'windy-point-forecast',
+    ]);
   });
 
   it('every docsUrl is a well-formed https URL', () => {
