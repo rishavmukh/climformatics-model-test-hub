@@ -74,6 +74,35 @@ describe('fetchWindySeries', () => {
     expect(sentBody['parameters']).toEqual(['wind']);
   });
 
+  it('sorts out-of-order timestamps chronologically instead of plotting them in raw array order', async () => {
+    // ts intentionally out of order — simulates stitched forecast-run chunks arriving unsorted.
+    const body = {
+      ts: [3_000, 1_000, 2_000],
+      units: { 'temp-surface': '°C' },
+      'temp-surface': [30, 10, 20],
+    };
+    fetchMock.mockResolvedValueOnce({ ok: true, status: 200, text: () => Promise.resolve(JSON.stringify(body)) });
+
+    const result = await fetchWindySeries(baseQuery());
+
+    expect(result.hourly?.time).toEqual([new Date(1_000).toISOString(), new Date(2_000).toISOString(), new Date(3_000).toISOString()]);
+    expect(result.hourly?.series.temp).toEqual([10, 20, 30]);
+  });
+
+  it('drops duplicate timestamps, keeping the first occurrence', async () => {
+    const body = {
+      ts: [1_000, 2_000, 2_000],
+      units: {},
+      'temp-surface': [10, 20, 999],
+    };
+    fetchMock.mockResolvedValueOnce({ ok: true, status: 200, text: () => Promise.resolve(JSON.stringify(body)) });
+
+    const result = await fetchWindySeries(baseQuery());
+
+    expect(result.hourly?.time).toEqual([new Date(1_000).toISOString(), new Date(2_000).toISOString()]);
+    expect(result.hourly?.series.temp).toEqual([10, 20]);
+  });
+
   it('surfaces the API-provided message on a non-ok response', async () => {
     fetchMock.mockResolvedValue({
       ok: false,

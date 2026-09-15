@@ -3,6 +3,7 @@ import { Link, NavLink } from 'react-router-dom';
 const LINKS = [
   { to: '/', label: 'Providers', end: true },
   { to: '/dashboard', label: 'Testing', end: false },
+  { to: '/compare', label: 'Compare', end: false },
   { to: '/settings', label: 'Settings', end: false },
 ];
 

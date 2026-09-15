@@ -108,7 +108,7 @@ export async function fetchWindySeries(query: WindyQuery): Promise<SeriesResult>
   }
 
   const body = parsed as RawResponse;
-  const time = (body.ts ?? []).map((ms) => new Date(ms).toISOString());
+  const rawTs = body.ts ?? [];
   const units = body.units ?? {};
 
   const series: Record<string, SeriesValue[]> = {};
@@ -140,11 +140,31 @@ export async function fetchWindySeries(query: WindyQuery): Promise<SeriesResult>
     outputUnits[variable] = units[spec.responseKey] ?? '';
   }
 
+  // Windy's docs don't guarantee `ts` arrives sorted, and at longer lead times point-forecast
+  // APIs commonly stitch together separate forecast-run chunks — if those land out of order,
+  // plotting by raw array position produces a sawtooth even though each individual value is
+  // real. Sort by actual timestamp and drop exact-duplicate timestamps (keeping the first) so
+  // a chart of this series is never worse than chronological, regardless of what the API sent.
+  const order = rawTs.map((_, index) => index).sort((a, b) => (rawTs[a] ?? 0) - (rawTs[b] ?? 0));
+  const seenTs = new Set<number>();
+  const dedupedOrder = order.filter((index) => {
+    const ts = rawTs[index];
+    if (ts === undefined || seenTs.has(ts)) return false;
+    seenTs.add(ts);
+    return true;
+  });
+
+  const time = dedupedOrder.map((index) => new Date(rawTs[index] ?? 0).toISOString());
+  const sortedSeries: Record<string, SeriesValue[]> = {};
+  for (const [variable, values] of Object.entries(series)) {
+    sortedSeries[variable] = dedupedOrder.map((index) => values[index] ?? null);
+  }
+
   return {
     latitude: query.latitude,
     longitude: query.longitude,
     timezone: 'UTC',
     requestedModels: [query.model],
-    hourly: { time, units: outputUnits, series },
+    hourly: { time, units: outputUnits, series: sortedSeries },
   };
 }
